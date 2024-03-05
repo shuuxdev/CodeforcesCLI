@@ -33,7 +33,7 @@ public class ConfigHelper
     {
         for (int i = 0; i < args.Length; i+=2)
         {
-            PropertyInfo? property = (typeof(StateUpdatingCommand) ?? typeof(FunctionalCommand)).GetProperty(args[i]); 
+            PropertyInfo? property = typeof(StateUpdatingCommand).GetProperty(args[i]) ?? typeof(FunctionalCommand).GetProperty(args[i]); 
             if (property == null)
             {
                 Console.WriteLine("Command [{0}] not exists", args[i]);
@@ -84,15 +84,33 @@ public class ConfigHelper
         problemName = problemName.Replace(" ", "_");
         StringBuilder sb = new StringBuilder(problemName);
         
-        for (int i = 0; i < problemName.Length; ++i)
+        for (int i = 0, j = 0; i < problemName.Length; ++i , ++j)
         {
             if (!validChars.Contains(problemName[i]))
             {
-                sb.Remove(i,1);
+                sb.Remove(j,1);
+                --j;
             }
         }
         problemName = sb.ToString();
         return problemName;
+    }
+
+    public static string ToValidName(string str)
+    {
+        string validChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-0123456789 ";
+        StringBuilder sb = new StringBuilder(str);
+
+        for (int i = 0, j = 0; i < str.Length; ++i , ++j)
+        {
+            if (!validChars.Contains(str[i]))
+            {
+                sb.Remove(j,1);
+                --j;
+            }
+        }
+        str = sb.ToString();
+        return str;
     }
 
     public static void SelectProblem(string problemName)
@@ -130,7 +148,7 @@ public class ConfigHelper
 
         Config.CURRENT_SELECT_PROBLEM_PATH = allFiles[0];
         Config.CURRENT_SELECT_INPUT_PATH = allFiles[1];
-        Config.CURRENT_SELECT_OUTPUT_PATH = allFiles[2];
+        Config.CURRENT_SELECT_ANSWER_PATH = allFiles[2];
 
 
         
@@ -177,7 +195,7 @@ public class ConfigHelper
         {
            
             
-            string problemName = problem.InnerHtml;
+            string problemName = ToValidName(problem.InnerHtml);
             
             HttpResponseMessage problemPage =  client.GetAsync(requestUri: $"{CONTEST}/{contestId}/problem/${problemName.Trim()[0]}", completionOption:HttpCompletionOption.ResponseContentRead).Result;
             string p =  problemPage.Content.ReadAsStringAsync().Result;
@@ -189,7 +207,7 @@ public class ConfigHelper
             string pathToProblemDirectory = $"{generatedContestPath}/{problemName}";
             string pathToCsFile = $"{pathToProblemDirectory}/{problemName}.cs";
             string pathToInputFile = $"{pathToProblemDirectory}/[INPUT] {problemName}.txt";
-            string pathToOutputFile = $"{pathToProblemDirectory}/[OUTPUT] {problemName}.txt";
+            string pathToOutputFile = $"{pathToProblemDirectory}/[ANSWER] {problemName}.txt";
             Directory.CreateDirectory(pathToProblemDirectory);
 
             string templateContent = Generator.GenerateTemplate(problemName);
@@ -213,7 +231,7 @@ public class ConfigHelper
                 // Write the content to the file
                 writer.Write(outputContent);
             }
-            Log("[OUTPUT]{0} created and content written successfully!",ConsoleColor.Green, problemName);
+            Log("[ANSWER]{0} created and content written successfully!",ConsoleColor.Green, problemName);
            
 
         }

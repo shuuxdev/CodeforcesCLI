@@ -6,7 +6,7 @@ public static class Config
 
     public static string CURRENT_SELECT_INPUT_PATH;
 
-    public static string CURRENT_SELECT_OUTPUT_PATH;
+    public static string CURRENT_SELECT_ANSWER_PATH;
 
     public static string CURRENT_SELECT_CONTEST;
 
