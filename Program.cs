@@ -5,9 +5,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using CodeforcesCLI;
 
-ConfigHelper.InitConfig(args);
+// ConfigHelper.InitConfig(args);
 
-
-//TestingHelper.Run();
+TestingHelper.Run();
 
 //ConfigHelper.PrintConfig();

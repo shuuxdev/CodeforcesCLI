@@ -6,14 +6,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CodeforcesCLI.Exceptions;
+using CodeforcesCLI.Models;
 using HtmlAgilityPack;
 
 namespace CodeforcesCLI;
 
-public class AppSetting
-{
-    public string CurrentProblem { get; set; }
-}
+
 public class ConfigHelper
 {
     private const string CODEFORCES = "https://codeforces.com/";
@@ -118,15 +117,20 @@ public class ConfigHelper
         if (Config.CURRENT_SELECT_CONTEST == null)
         {
             Log("Please select a contest", ConsoleColor.Red);
-            return;
+            throw new NoContestSelectedException();
         }
 
+        if (Config.WORKING_DIRECTORY_PATH == null)
+        {
+            Log("Please select a working directory", ConsoleColor.Red);
+            throw new NoWorkingDirectorySelectedException();
+        }
         string[] allContestDirectories = Directory.GetDirectories(Config.WORKING_DIRECTORY_PATH);
         string pathToContestDirectory = allContestDirectories.Where(dir => dir.Contains(Config.CURRENT_SELECT_CONTEST)).FirstOrDefault();
         if (pathToContestDirectory == null)
         {
             Log("Contest [{0}] doesn't exists in the directory {1}", ConsoleColor.Red, Config.CURRENT_SELECT_CONTEST, Config.WORKING_DIRECTORY_PATH);
-            return;
+            throw new ContestNotFoundException();
         }
         
         
@@ -136,14 +140,14 @@ public class ConfigHelper
         if (pathToProblemDirectory == null)
         {
             Log("Problem [{0}] doesn't exists in the directory {1}", ConsoleColor.Red, problemName, pathToContestDirectory);
-            return;
+            throw new ProblemNotFoundException();
         }
         string _problemName = pathToProblemDirectory.Split(@"\").LastOrDefault();
         string[] allFiles = Directory.GetFiles(pathToProblemDirectory);
         if (allFiles.Length != 3)
         {
             Log("Missing files, make sure that you have cs,input,output files exists in the directory", ConsoleColor.Red);
-            return;
+            throw new InvalidProblemStructureException();
         }
 
         Config.CURRENT_SELECT_PROBLEM_PATH = allFiles[0];
